@@ -558,7 +558,11 @@ def get_sarif_content(report, testname, elapsed):
 
     for (filename, rule_id, no_error, message) in report:
         # Populate the artifact information (source files analyzed)
-        artifacts.append({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
+        if os.path.isabs(filename):
+            artifact = {'location': {'uri': filename}}
+        else:
+            artifact = {'location': {'uri': filename, 'uriBaseId': os.getcwd()}}
+        artifacts.append(artifact)
 
         # Process any associated error/warning info associated with this file
         if not no_error:
@@ -575,7 +579,10 @@ def get_sarif_content(report, testname, elapsed):
             # Populate the results of the analysis (issues discovered)
             message = message
             line = 1  # Indicate copyright issues at the start of the file since we don't have a line number
-            index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
+            if os.path.isabs(filename):
+                            index = artifacts.index({'location': {'uri': filename}})
+                        else:
+                            index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
 
             results.append({
                 'ruleId': rule_id,

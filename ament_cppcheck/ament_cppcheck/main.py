@@ -413,7 +413,11 @@ def get_sarif_content(cppcheck_version, report, testname, elapsed, skip=None):
     # Populate the artifact information (source files analyzed)
     artifacts = sarif['runs'][0]['artifacts']
     for filename in sorted(report.keys()):
-        artifact = {'location': {'uri': filename, 'uriBaseId': os.getcwd()}}
+        # Include uriBaseId if the filename is not absolute
+        if os.path.isabs(filename):
+            artifact = {'location': {'uri': filename}}
+        else:
+            artifact = {'location': {'uri': filename, 'uriBaseId': os.getcwd()}}
         artifacts.append(artifact)
 
     # Populate the results of the analysis (issues discovered)
@@ -421,7 +425,11 @@ def get_sarif_content(cppcheck_version, report, testname, elapsed, skip=None):
     for filename in sorted(report.keys()):
         errors = report[filename]
         for error in errors:
-            index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
+            # Include uriBaseId if the filename is not absolute
+            if os.path.isabs(filename):
+                index = artifacts.index({'location': {'uri': filename}})
+            else:
+                index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
             results_dict = {
                 'ruleId': error['id'],
                 'level': 'warning',

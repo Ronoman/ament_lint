@@ -497,7 +497,11 @@ def get_sarif_content(report, testname, elapsed, uncrustify_version):
 
     for (filename, diff_lines) in report:
         # Populate the artifact information (source files analyzed)
-        artifacts.append({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
+        if os.path.isabs(filename):
+            artifact = {'location': {'uri': filename}}
+        else:
+            artifact = {'location': {'uri': filename, 'uriBaseId': os.getcwd()}}
+        artifacts.append(artifact)
 
         # Process any associated error/warning info associated with this file
         if diff_lines:
@@ -518,6 +522,10 @@ def get_sarif_content(report, testname, elapsed, uncrustify_version):
                     # If we've been collecting an issue (true for all but the first time)
                     if code_segment:
                         # Populate the results with this code formatting issue
+                        if os.path.isabs(filename):
+                            index = artifacts.index({'location': {'uri': filename}})
+                        else:
+                            index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
                         results.append({
                             'ruleId': rule_id,
                             'level': 'error',
@@ -528,7 +536,7 @@ def get_sarif_content(report, testname, elapsed, uncrustify_version):
                                 'physicalLocation': {
                                     'artifactLocation': {
                                         'uri': filename,
-                                        'index': artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}}),
+                                        'index': index,
                                     },
                                     'region': {
                                         'startLine': int(starting_line),

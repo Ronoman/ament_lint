@@ -580,9 +580,9 @@ def get_sarif_content(report, testname, elapsed):
             message = message
             line = 1  # Indicate copyright issues at the start of the file since we don't have a line number
             if os.path.isabs(filename):
-                            index = artifacts.index({'location': {'uri': filename}})
-                        else:
-                            index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
+                index = artifacts.index({'location': {'uri': filename}})
+            else:
+                index = artifacts.index({'location': {'uri': filename, 'uriBaseId': os.getcwd()}})
 
             results.append({
                 'ruleId': rule_id,
